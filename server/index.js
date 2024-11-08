@@ -10,7 +10,7 @@ const server = http.createServer((req, res) => {
 const io = socket(server, {
     transports: ['websocket', 'polling'],
     cors: {
-        origine: "*",
+        origine: "https://chat-client.md-genos.com",
         methods: ['GET', 'POST']
     }
 })
