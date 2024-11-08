@@ -1,37 +1,57 @@
-const http = require('http')
-const socket = require('socket.io')
-const port = 8080
+const http = require('http');
+const socketIo = require('socket.io');
+const express = require('express');
+const cors = require('cors');
+const app = express();
+const messageRoutes = require('./routes/message');
+
+
+app.use(cors())
+app.use('/', messageRoutes)
+
 
 const server = http.createServer((req, res) => {
-    res.writeHead(200, {'Content-Type': 'text/plain'})
-    res.end("server socket.io fonctionne")
+
+    res.writeHead(200, {'Content-Type': 'text/plain'});
+    res.end('serveur socket.io en fonctionnement');
 
 })
-const io = socket(server, {
+const io = socketIo(server, {
+
     transports: ['websocket', 'polling'],
     cors: {
-        origine: "https://chat-client.md-genos.com",
-        methods: ['GET', 'POST']
+        origin: "*",
+        methods: ["GET", "POST"],
     }
-})
-io.on('connect', (socket) => {
-    socket.on('message', (data) => {
+
+});
+
+
+io.on('connection', (socket) => {
+
+    socket.emit('connected', 'Welcome!')
+    socket.on('message', (message) => {
+        console.log('Received message from ' + socket.id);
+        console.log(message.content);
 
         try {
             io.emit('message', {
                 author: socket.id,
-                content: data.content,
+                content: message.content,
             });
         } catch (e) {
             console.log(e);
         } finally {
+            console.log('Broadcasted message to all clients');
             console.log(io.sockets.sockets.size);
         }
     })
 
-
 })
 
-server.listen(port, () => {
-    console.log('Listening on port 8080')
-})
+server.listen(8008, () => {
+    console.log('Server listening on port 8008');
+});
+app.listen(3000, () => {
+    console.log('App listening on port 3000');
+});
