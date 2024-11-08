@@ -16,8 +16,14 @@ socket.on('connect', () => {
             let messageToSend = document.querySelector('input').value
 
             console.log(messageToSend)
-            socket.emit('message',
-                { content: messageToSend } )
+
+            sendMessage(messageToSend).then(() => {
+                socket.emit('message',
+                    { content: messageToSend } )
+            })
+
+
+
             document.querySelector('input').value = ""
         })
 

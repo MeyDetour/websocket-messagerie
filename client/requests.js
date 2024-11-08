@@ -7,9 +7,21 @@ async function getMessages() {
             throw new Error('Erreur HTTP : ' + response.status);
         }
         const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error(error)
+    }
+}
+async function sendMessage(message) {
+    try {
+        const response = await fetch(url + '/messages',{body:JSON.stringify(message)},);
+        if (!response.ok) {
+            throw new Error('Erreur HTTP : ' + response.status);
+        }
+        const data = await response.json();
         console.log(data);
         return data;
     } catch (error) {
-        console.error('Erreur lors de la récupération des messages :', error);
+        console.error(error);
     }
 }

@@ -4,6 +4,16 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const messageRoutes = require('./routes/message');
+const mongoose = require('moongoose')
+const mongodUri = 'mongodb://localhost:27017/messagerieExpress';
+
+
+mongoose.connect(mongodUri)
+    .then(() => {
+        console.log('connected')
+    }).catch((err) => {
+        console.log(err)
+})
 
 
 app.use(cors())
