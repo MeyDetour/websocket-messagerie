@@ -1,9 +1,10 @@
 const {Router} = require('express');
 const router = Router();
-const {getMessages,createMessage} = require('../controllers/messages');
+const {getMessages,createMessage,removeMessage} = require('../controllers/messages');
 
 router.get('/messages', getMessages);
-router.post('/new/message', createMessage);
+router.post('/message/new', createMessage);
+router.delete('/message/:id/remove', removeMessage);
 
 
 module.exports = router

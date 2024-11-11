@@ -4,20 +4,11 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 const messageRoutes = require('./routes/message');
-const mongoose = require('moongoose')
-const mongodUri = 'mongodb://localhost:27017/messagerieExpress';
+const connectToDatabase = require("./mongoose");
 
 
-mongoose.connect(mongodUri)
-    .then(() => {
-        console.log('connected')
-    }).catch((err) => {
-        console.log(err)
-})
-
-
+app.use(express.json());
 app.use(cors())
-app.use('/', messageRoutes)
 
 
 const server = http.createServer((req, res) => {
@@ -35,11 +26,24 @@ const io = socketIo(server, {
     }
 
 });
+connectToDatabase().then(() => {
+    app.use('/', messageRoutes)
+
+    server.listen(8008, () => {
+        console.log('Server listening on port 8008');
+    });
+    app.listen(4000, () => {
+        console.log('App listening on port 4000');
+    });
+
+});
 
 
 io.on('connection', (socket) => {
 
-    socket.emit('connected', 'Welcome!')
+    console.log("connected to socket")
+    //start to emit when connected to db
+    socket.emit('connectionValidation', 'Welcome!')
     socket.on('message', (message) => {
         console.log('Received message from ' + socket.id);
         console.log(message.content);
@@ -48,6 +52,7 @@ io.on('connection', (socket) => {
             io.emit('message', {
                 author: socket.id,
                 content: message.content,
+                id: message.id,
             });
         } catch (e) {
             console.log(e);
@@ -57,11 +62,6 @@ io.on('connection', (socket) => {
         }
     })
 
+
 })
 
-server.listen(8008, () => {
-    console.log('Server listening on port 8008');
-});
-app.listen(3000, () => {
-    console.log('App listening on port 3000');
-});
