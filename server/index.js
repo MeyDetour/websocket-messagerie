@@ -3,8 +3,17 @@ const socketIo = require('socket.io');
 const express = require('express');
 const cors = require('cors');
 const app = express();
+
+//routes
 const messageRoutes = require('./routes/message');
+const userRoutes = require('./routes/user');
+
+//mongodb
 const connectToDatabase = require("./mongoose");
+
+//postgresql
+
+
 
 
 app.use(express.json());
@@ -28,6 +37,7 @@ const io = socketIo(server, {
 });
 connectToDatabase().then(() => {
     app.use('/', messageRoutes)
+    app.use('/', userRoutes)
 
     server.listen(8008, () => {
         console.log('Server listening on port 8008');
