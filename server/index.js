@@ -68,7 +68,7 @@ io.on('connection', (socket) => {
             console.log(e);
         } finally {
             console.log('Broadcasted message to all clients');
-            console.log(io.sockets.sockets.size);
+
         }
     })
 

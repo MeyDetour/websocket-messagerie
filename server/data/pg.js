@@ -7,7 +7,7 @@ const pool = new Pool({
     port: 5432
 });
 pool.on('connect', client => {
-    client.query('set search_path to persons')
+    client.query('SET search_path TO persons;')
     console.log('connected to database postgres')
 });
 

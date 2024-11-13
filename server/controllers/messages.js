@@ -11,8 +11,6 @@ async function getMessages(req, res) {
 async function createMessage(req, res) {
     const {content} = req.body
     console.log("data here :" + content)
-    console.log(mongoose.connection)
-    console.log(mongoose.connection.readyState)
     if (mongoose.connection.readyState !== 1) {
         console.log('La connexion à MongoDB n\'est pas établie');
         return res.status(500).send({message: 'La connexion à la base de données n\'est pas établie'});
