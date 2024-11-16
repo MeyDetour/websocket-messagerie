@@ -1,63 +1,136 @@
 const socket = io('ws://localhost:8008');
+let messagerie = document.querySelector('.messagerie');
+let loginForm = document.querySelector('.loginform');
+let registerForm = document.querySelector('.registerform');
 
-function addMessageHtml(content,id) {
-    const ligne = document.createElement('li')
-    const button = document.createElement('button')
-    button.addEventListener('click',()=>{
-        removeMessage(id).then(r => {
-            if (r.message=='ok'){
-                ligne.remove()
-            }
+let userObject= null;
+
+function renderMessagerie() {
+    if (userObject != null) {
+        hideAll()
+        messagerie.style.display = 'block';
+        getMessages().then((data) => {
+            console.log(data)
+            //empty content
+            messagerie.querySelector('ul').innerHTML = '';
+
+            //add message saved
+            for (let message of data) {
+                console.log(message)
+                if(message.userObject.name!= null){
+                    addMessageHtml(message.content,  message._id,message.userObject.name);
+
+                }
+              }
+
+
+
         })
-    })
+        document.querySelector('button').addEventListener('click', () => {
+            let messageToSend = document.querySelector('input').value
 
-    button.textContent= "delete"
+            console.log(messageToSend)
 
-    ligne.innerHTML = content;
+            sendMessage(messageToSend,userObject.id).then((message) => {
+                console.log({
+                    content: messageToSend,
+                    id: message._id,
+                    userObject : userObject
+                }, 'data send')
+                socket.emit('message',
+                    {
+                        content: messageToSend,
+                        id: message._id,
+                        userObject : userObject
+                    })
+            })
 
-    ligne.appendChild(button)
-    document.querySelector('ul').appendChild(ligne);
+
+            document.querySelector('input').value = ""
+        })
+    }
 }
 
+function addMessageHtml(content, id,name) {
+    if(userObject !== null) {
+        const ligne = document.createElement('li')
+        const button = document.createElement('button')
+        button.addEventListener('click', () => {
+            removeMessage(id).then(r => {
+                if (r.message == 'ok') {
+                    ligne.remove()
+                }
+            })
+        })
+
+
+        button.textContent = "delete"
+
+        ligne.innerHTML = name+" : "+content;
+
+        ligne.appendChild(button)
+        messagerie.querySelector('ul').appendChild(ligne);
+    }
+
+}
+
+function hideAll() {
+    loginForm.style.display = 'none';
+    messagerie.style.display = 'none';
+    registerForm.style.display = 'none';
+}
+
+document.querySelector('.toRegisterForm ').addEventListener('click', () => {
+    hideAll();
+    registerForm.style.display = 'block';
+});
+document.querySelector('.toLoginForm ').addEventListener('click', () => {
+    hideAll();
+    loginForm.style.display = 'block';
+});
+document.querySelector('.disconnect ').addEventListener('click', () => {
+    hideAll();
+    loginForm.style.display = 'block';
+});
 
 socket.on('connectionValidation', () => {
+    hideAll();
+    loginForm.style.display = 'block';
 
-    //get all message when we connect
-    getMessages().then((data) => {
+    //add last messages add
+    socket.on('message', (data) => {
+        console.log(data, "data received")
+        addMessageHtml(data.content, data.id,data.userObject['name'])
+    })
 
-        //empty content
-        document.querySelector('ul').innerHTML = '';
 
-        //add message saved
-        for (let message in data) {
-            addMessageHtml(data[message].content,data[message]._id)
+    document.querySelector('.loginform button').addEventListener('click', () => {
+        username = document.querySelector('.loginform input[name="username"]').value
+        if (username.trim().length > 0) {
+            login(document.querySelector('.loginform input[name="username"]').value).then(res => {
+
+                if (res.userObject != null) {
+                    userObject = res.userObject;
+                    renderMessagerie()
+                }
+            })
         }
 
-        //add last messages add
-        socket.on('message', (data) => {
-            console.log(data,"data received")
-            addMessageHtml(data.content,data.id)
-        })
-
-
     })
-    document.querySelector('button').addEventListener('click', () => {
-        let messageToSend = document.querySelector('input').value
+    document.querySelector('.registerform button').addEventListener('click', () => {
+        username = document.querySelector('.registerform input[name="username"]').value
 
-        console.log(messageToSend)
-
-        sendMessage(messageToSend).then((message) => {
-            console.log( {content: messageToSend,
-                id:message._id
-            },'data send')
-            socket.emit('message',
-                {content: messageToSend,
-                id:message._id
-                })
-        })
-
-
-        document.querySelector('input').value = ""
+        if (username.trim().length > 0) {
+            register(username).then(res => {
+                console.log(res)
+                if (res.userObject != null) {
+                    userObject = res.userObject;
+                    renderMessagerie()
+                }
+            })
+        }
     })
+
+renderMessagerie();
 })
 

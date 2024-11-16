@@ -4,6 +4,9 @@ const Message = new mongoose.Schema({
     content: {
         type: mongoose.SchemaTypes.String
     },
+    user : {
+        type : mongoose.SchemaTypes.Number,
+    }
 
 })
 

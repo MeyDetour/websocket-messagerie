@@ -3,7 +3,19 @@ const socketIo = require('socket.io');
 const express = require('express');
 const cors = require('cors');
 const app = express();
+const {Pool} = require('pg');
+const pool = new Pool({
+    user: 'postgres',
+    host: 'localhost',
+    database: 'websocket',
+    password: 'HB6RIZ9w$cFAV6@$',
+    port: 5432
+});
 
+console.log("ppol:",pool);
+
+
+module.exports = pool;
 //routes
 const messageRoutes = require('./routes/message');
 const userRoutes = require('./routes/user');
@@ -35,15 +47,26 @@ const io = socketIo(server, {
     }
 
 });
+let serverInitialized = false;
 connectToDatabase().then(() => {
-    app.use('/', messageRoutes)
-    app.use('/', userRoutes)
+    console.log('connected to mongoose')
+    pool.on('connect', client => {
+        client.query('SET search_path TO persons;')
+        console.log('connected to database postgres')
 
+        app.use('/', messageRoutes)
+        app.use('/', userRoutes)
+if(!serverInitialized){
     server.listen(8008, () => {
         console.log('Server listening on port 8008');
     });
     app.listen(4000, () => {
         console.log('App listening on port 4000');
+    });
+
+    serverInitialized = true;
+}
+
     });
 
 });
@@ -55,12 +78,13 @@ io.on('connection', (socket) => {
     //start to emit when connected to db
     socket.emit('connectionValidation', 'Welcome!')
     socket.on('message', (message) => {
-        console.log('Received message from ' + socket.id);
+        console.log('Received message from ' + message.userObject.name);
         console.log(message.content);
 
         try {
             io.emit('message', {
                 author: socket.id,
+                userObject: message.userObject,
                 content: message.content,
                 id: message.id,
             });
@@ -74,4 +98,3 @@ io.on('connection', (socket) => {
 
 
 })
-
