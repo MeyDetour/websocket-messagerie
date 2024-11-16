@@ -17,10 +17,8 @@ async function getOneUser(req, res) {
 }
 async function getOneUserName(id) {
     try {
-        // Check if id is a valid number before querying
 
         const {rows} = await pool.query('SELECT * FROM public.users WHERE id = $1', [id]);
-        // Check if user exists
         if (rows.length > 0) {
             return rows[0].name;
         } else {
@@ -51,7 +49,6 @@ async function register(req, res) {
 
     try {
         const {username} = req.body;
-
         const {rows} = await pool.query('INSERT INTO public.users (name) VALUES( $1) RETURNING *', [username]);
         return res.json({userObject: {id: rows[0].id, name: rows[0].name}});
 

@@ -1,97 +1,95 @@
 const socket = io('ws://localhost:8008');
-let messagerie = document.querySelector('.messagerie');
-let loginForm = document.querySelector('.loginform');
-let registerForm = document.querySelector('.registerform');
 
-let userObject= null;
 
-function renderMessagerie() {
+//user connected with id and name
+let userObject = null;
+
+
+function messagerieController() {
+
+    //assert user connected
     if (userObject != null) {
-        hideAll()
-        messagerie.style.display = 'block';
+
+        //================render
+        renderMessagerie()
+
         getMessages().then((data) => {
-            console.log(data)
-            //empty content
+            // to empty content before regenerate
             messagerie.querySelector('ul').innerHTML = '';
 
-            //add message saved
+            //add message
             for (let message of data) {
-                console.log(message)
-                if(message.userObject.name!= null){
-                    addMessageHtml(message.content,  message._id,message.userObject.name);
+                if (message.userObject.name != null) {
 
+
+                    messagerie.querySelector('ul').innerHTML+= messageTemplate(message.content, message.id, message.userObject.name);
                 }
-              }
+            }
 
-
-
+            /*    for (let message of data) {
+                if (message.userObject.name != null) {
+                  addMessageHtml(message.content, message.id, message.userObject.name);
+                }
+            }*/
         })
+        //================
+
+        //=================Send message click
         document.querySelector('button').addEventListener('click', () => {
             let messageToSend = document.querySelector('input').value
-
-            console.log(messageToSend)
-
-            sendMessage(messageToSend,userObject.id).then((message) => {
-                console.log({
-                    content: messageToSend,
-                    id: message._id,
-                    userObject : userObject
-                }, 'data send')
+            //save in data base and then render locally
+            sendMessage(messageToSend, userObject.id).then((message) => {
                 socket.emit('message',
                     {
                         content: messageToSend,
                         id: message._id,
-                        userObject : userObject
+                        userObject: userObject
                     })
             })
-
-
+            //empty input texte
             document.querySelector('input').value = ""
         })
+        //================
     }
 }
 
-function addMessageHtml(content, id,name) {
-    if(userObject !== null) {
-        const ligne = document.createElement('li')
-        const button = document.createElement('button')
-        button.addEventListener('click', () => {
-            removeMessage(id).then(r => {
-                if (r.message == 'ok') {
-                    ligne.remove()
-                }
-            })
+function tryToRemoveMessage(id){
+    removeMessage(id).then(r => {
+        if (r.message == 'ok') {
+            const element = document.querySelector(`[data-id='${id}']`);
+            if (element) {
+                console.log(element);
+                element.remove();
+            } else {
+                console.warn('Element not found for id:', id);
+            }   }
+    })
+}
+const tryToLogin = () => {
+    username = document.querySelector('.loginform input[name="username"]').value
+    if (username.trim().length > 0) {
+        login(document.querySelector('.loginform input[name="username"]').value).then(res => {
+            if (res.userObject != null) {
+                userObject = res.userObject;
+                messagerieController()
+            }
         })
-
-
-        button.textContent = "delete"
-
-        ligne.innerHTML = name+" : "+content;
-
-        ligne.appendChild(button)
-        messagerie.querySelector('ul').appendChild(ligne);
     }
+}
+const tryToRegister = () => {
+    username = document.querySelector('.registerform input[name="username"]').value
 
+    if (username.trim().length > 0) {
+        register(username).then(res => {
+            if (res.userObject != null) {
+                userObject = res.userObject;
+                messagerieController()
+            }
+        })
+    }
 }
 
-function hideAll() {
-    loginForm.style.display = 'none';
-    messagerie.style.display = 'none';
-    registerForm.style.display = 'none';
-}
 
-document.querySelector('.toRegisterForm ').addEventListener('click', () => {
-    hideAll();
-    registerForm.style.display = 'block';
-});
-document.querySelector('.toLoginForm ').addEventListener('click', () => {
-    hideAll();
-    loginForm.style.display = 'block';
-});
-document.querySelector('.disconnect ').addEventListener('click', () => {
-    hideAll();
-    loginForm.style.display = 'block';
-});
 
 socket.on('connectionValidation', () => {
     hideAll();
@@ -99,38 +97,12 @@ socket.on('connectionValidation', () => {
 
     //add last messages add
     socket.on('message', (data) => {
-        console.log(data, "data received")
-        addMessageHtml(data.content, data.id,data.userObject['name'])
+        console.log(data.content, data.id, data.userObject['name'], "data received")
+        addMessageHtml(data.content, data.id, data.userObject['name'])
     })
 
 
-    document.querySelector('.loginform button').addEventListener('click', () => {
-        username = document.querySelector('.loginform input[name="username"]').value
-        if (username.trim().length > 0) {
-            login(document.querySelector('.loginform input[name="username"]').value).then(res => {
 
-                if (res.userObject != null) {
-                    userObject = res.userObject;
-                    renderMessagerie()
-                }
-            })
-        }
-
-    })
-    document.querySelector('.registerform button').addEventListener('click', () => {
-        username = document.querySelector('.registerform input[name="username"]').value
-
-        if (username.trim().length > 0) {
-            register(username).then(res => {
-                console.log(res)
-                if (res.userObject != null) {
-                    userObject = res.userObject;
-                    renderMessagerie()
-                }
-            })
-        }
-    })
-
-renderMessagerie();
+    messagerieController();
 })
 

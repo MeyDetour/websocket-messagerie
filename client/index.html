@@ -7,6 +7,8 @@
             integrity="sha384-OoIbkvzsFFQAG88r+IqMAjyOtYDPGO0cqK5HF5Uosdy/zUEGySeAzytENMDynREd"
             crossorigin="anonymous"></script>
     <script defer src="requests.js"></script>
+    <script defer src="view/view.js"></script>
+    <script defer src="templates/message.js"></script>
     <script defer src="main.js"></script>
     <link rel="stylesheet" href="style.css">
 
@@ -21,23 +23,23 @@
     <input type="text">
     <button>send</button>
 
-    <button class="disconnect">Disconnect</button>
+    <button class="disconnect" onclick="renderLoginForm()">Disconnect</button>
 
 </div>
 
 <div class="loginform">
     <h1>Login form</h1>
     <input type="text" name="username" placeholder="username">
-    <button>login</button>
+    <button onclick="tryToLogin()">login</button>
 
 
-    <button class="toRegisterForm">Navigate to Register</button>
+    <button class="toRegisterForm" onclick="renderRegisterForm()">Navigate to Register</button>
 </div>
 <div class="registerform">
     <h1>Register form</h1>
     <input type="text" name="username" placeholder="username">
-    <button>login</button>
-    <button class="toLoginForm">Navigate to Login</button>
+    <button onclick="tryToRegister()">Register</button>
+    <button class="toLoginForm" onclick="renderLoginForm()">Navigate to Login</button>
 </div>
 
 
