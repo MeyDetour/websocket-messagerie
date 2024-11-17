@@ -1,8 +1,14 @@
-const messageTemplate = (content, id, name) => {
+const messageTemplate = (content, id, userId ,userName) => {
+
+
+
     return `
    <li data-id="${id}">
-       <span>${name} : ${content}</span>
-       <button onclick="tryToRemoveMessage('${id}')">delete</button>
+       <span>${userName} : ${content}</span>
+       ${userId == userObject.id ?
+        `<button onClick="tryToRemoveMessage('${id}')">delete</button>` :
+        ''
+    }
    </li>
     `;
 };

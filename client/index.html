@@ -6,10 +6,12 @@
     <script src="https://cdn.socket.io/4.8.0/socket.io.min.js"
             integrity="sha384-OoIbkvzsFFQAG88r+IqMAjyOtYDPGO0cqK5HF5Uosdy/zUEGySeAzytENMDynREd"
             crossorigin="anonymous"></script>
+
     <script defer src="requests.js"></script>
+    <script defer src="main.js"></script>
+    <script defer src="controller/controllers.js"></script>
     <script defer src="view/view.js"></script>
     <script defer src="templates/message.js"></script>
-    <script defer src="main.js"></script>
     <link rel="stylesheet" href="style.css">
 
 </head>
@@ -21,7 +23,7 @@
 
     </ul>
     <input type="text">
-    <button>send</button>
+    <button onclick="tryTosendMessage()">send</button>
 
     <button class="disconnect" onclick="renderLoginForm()">Disconnect</button>
 
